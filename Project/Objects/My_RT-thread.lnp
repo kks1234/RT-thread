@@ -1,0 +1,8 @@
+--cpu Cortex-M3
+".\objects\main.o"
+".\objects\startup_armcm3.o"
+".\objects\system_armcm3.o"
+--strict --scatter ".\Objects\My_RT-thread.sct"
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\My_RT-thread.map" -o .\Objects\My_RT-thread.axf
