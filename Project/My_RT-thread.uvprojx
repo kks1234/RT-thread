@@ -438,6 +438,11 @@
               <FileType>1</FileType>
               <FilePath>..\rtthread\3.0.3\src\thread.c</FilePath>
             </File>
+            <File>
+              <FileName>scheduler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\rtthread\3.0.3\src\scheduler.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

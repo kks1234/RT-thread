@@ -1,6 +1,9 @@
 #ifndef __RT_DEF_H__
 #define __RT_DEF_H__
 
+
+
+
 /*
 ************************************************************************************
 *                               数据类型                                 
@@ -58,6 +61,11 @@ typedef rt_base_t                                  rt_off_t;
 
 
 
+
+
+
+
+
 /* 双向链表节点数据类型 rt_list_t 定义 */ 
 struct rt_list_node
 {
@@ -82,6 +90,24 @@ struct rt_thread
 
 typedef struct rt_thread *rt_thread_t ;
 
+
+/*
+*************************************************************************************
+*                                   错误码定义     
+*************************************************************************************
+*/
+/* RT-Thread错误码重定义 */
+#define RT_EOK                                0              /**< There is no error */
+#define RT_ERROR                              1              /**< A generic error happens */
+#define RT_ETIMEOUT                           2              /**< Timed out */
+#define RT_EFULL                              3              /**< The resource is full */
+#define RT_EEMPTY                             4              /**< The resource is empty */
+#define RT_ENOMEM                             5              /**< No memory */
+#define RT_ENOSYS                             6              /**< No system */
+#define RT_EBUSY                              7              /**< Busy */
+#define RT_EIO                                8              /**< IO error */
+#define RT_EINTR                              9              /**< Interrupted system call */
+#define RT_EINVAL                             10             /**< Invalid argument */
 
 
 
