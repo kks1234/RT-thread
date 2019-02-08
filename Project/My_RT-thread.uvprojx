@@ -428,6 +428,11 @@
               <FileType>1</FileType>
               <FilePath>..\rtthread\3.0.3\libcpu\arm\cortex-m3\cpuport.c</FilePath>
             </File>
+            <File>
+              <FileName>context_rvds.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

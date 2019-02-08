@@ -1,5 +1,5 @@
 #include <rtthread.h>
-
+#include <rthw.h>
 
 
 
@@ -43,7 +43,7 @@ void rt_system_scheduler_start(void)
 	   在rthw.h声明,用于实现第一次线程切换。
 	   当一个汇编函数在C文件中调用的时候,如果有形参,
 	   则执行的时候会将形参传入到CPU寄存器r0 */
-	rt_hw_context_switch_to((rt_uint32_t)&to_rhtead->sp)						  
+	rt_hw_context_switch_to((rt_uint32_t)&to_rhtead->sp);						  
 }
 
 

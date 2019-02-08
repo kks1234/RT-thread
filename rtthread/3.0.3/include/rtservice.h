@@ -2,6 +2,14 @@
 #define __RT_SERVICE_H__
 
 
+/* rt_list_entry 宏定义 */
+#define rt_container_of(ptr, type, member)  \
+	((type*)((char*)(ptr) - (unsigned long)(&((type*)(0))->member)))
+		
+#define rt_list_entry(node, type, member)  \
+	rt_container_of(node, type, member)
+
+
 /*
 *************************************************************************
 *                           双向链表操作相关函数
