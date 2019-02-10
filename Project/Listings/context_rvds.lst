@@ -1,0 +1,484 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ;*******************************************************
+                       *************************
+    2 00000000         ;                          全局变量
+    3 00000000         ;*******************************************************
+                       *************************
+    4 00000000                 IMPORT           rt_thread_switch_interrupt_flag
+    5 00000000                 IMPORT           rt_interrupt_from_thread
+    6 00000000                 IMPORT           rt_interrupt_to_thread
+    7 00000000         
+    8 00000000         ;*******************************************************
+                       *************************
+    9 00000000         ;                           常量
+   10 00000000         ;*******************************************************
+                       *************************
+   11 00000000         ;-------------------------------------------------------
+                       -------------------------
+   12 00000000         ;有关内核外设寄存器定义可参考官方文档�
+                       ��STM32F10xxx Cortex-M3 programming manual
+   13 00000000         ;系统控制块外设SCB地址范围：0xE000ED00-0xE00
+                       0ED3F
+   14 00000000         ;-------------------------------------------------------
+                       -------------------------
+   15 00000000 E000ED08 
+                       SCB_VTOR
+                               EQU              0xE000ED08  ;向量表偏移寄
+                                                            存器
+   16 00000000 E000ED04 
+                       NVIC_INT_CTRL
+                               EQU              0xE000ED04  ;中断控制状态
+                                                            寄存器
+   17 00000000 E000ED20 
+                       NVIC_SYSPRI2
+                               EQU              0xE000ED20  ;系统优先级寄
+                                                            存器
+   18 00000000 00FF0000 
+                       NVIC_PENDSV_PRI
+                               EQU              0x00FF0000  ;PendSV 优先级�
+                                                            � (lowst)
+   19 00000000 10000000 
+                       NVIC_PENDSVSET
+                               EQU              0x10000000  ;触发 PendSV exce
+                                                            ption 的值
+   20 00000000         
+   21 00000000         ;*******************************************************
+                       *************************
+   22 00000000         ;                              代码产生指令
+   23 00000000         ;*******************************************************
+                       *************************
+   24 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
+2
+   25 00000000                 THUMB
+   26 00000000                 REQUIRE8
+   27 00000000                 PRESERVE8
+   28 00000000         
+   29 00000000         ;/*
+   30 00000000         ; *-----------------------------------------------------
+                       ------------------
+   31 00000000         ; * 函数原型：void rt_hw_context_switch_to(rt_uint3
+                       2 to);
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   32 00000000         ; * r0 --> to
+   33 00000000         ; * 该函数用于开启第一次线程切换
+   34 00000000         ; *-----------------------------------------------------
+                       ------------------
+   35 00000000         ; */
+   36 00000000         
+   37 00000000         
+   38 00000000         rt_hw_context_switch_to
+                               PROC
+   39 00000000         
+   40 00000000         ;导出rt_hw_context_switch_to使其具有全局属性,�
+                       ��以在C文件调用
+   41 00000000                 EXPORT           rt_hw_context_switch_to
+   42 00000000         
+   43 00000000         ;设置rt_interrupt_to_thread的值
+   44 00000000         ;将rt_interrupt_to_thread的地址加载到r1
+   45 00000000 4922            LDR              r1, =rt_interrupt_to_thread
+   46 00000002         ;将r0的值存储到rt_interrupt_to_thread
+   47 00000002 6008            STR              r0, [r1]    ;将R0中的字数�
+                                                            ��写入以R1为地
+                                                            址的存储器中
+   48 00000004         
+   49 00000004         ;设置rt_interrupt_from_thread的值为0 表示第一�
+                       �线程切换
+   50 00000004         ;将rt_interrupt_from_thread的地址加载到r1
+   51 00000004 4922            LDR              r1, =rt_interrupt_from_thread
+   52 00000006         ;配置r0 = 0
+   53 00000006 F04F 0000       MOV              r0, #0x0
+   54 0000000A         ;将r0的值存储到 rt_interrupt_from_thread
+   55 0000000A 6008            STR              r0, [r1]
+   56 0000000C         
+   57 0000000C         ; 设置中断标志位rt_thread_switch_interrupt_flag�
+                       �值为1
+   58 0000000C         ;将rt_thread_switch_interrupt_flag的地址加载到r1
+   59 0000000C 4921            LDR              r1, =rt_thread_switch_interrupt
+_flag
+   60 0000000E         ;配置r0等于1
+   61 0000000E F04F 0001       MOV              r0, #1
+   62 00000012         ;将r0的值存储到rt_thread_switch_interrupt_flag
+   63 00000012 6008            STR              r0, [r1]
+   64 00000014         
+   65 00000014         
+   66 00000014         ;设置 PendSV 异常的优先级
+   67 00000014 4820            LDR              r0, =NVIC_SYSPRI2
+   68 00000016 F44F 017F       LDR              r1, =NVIC_PENDSV_PRI
+   69 0000001A F8D0 2000       LDR.W            r2, [r0,#0x00] ;读
+   70 0000001E EA41 0102       ORR              r1,r1,r2    ;改
+   71 00000022 6001            STR              r1, [r0]    ;写
+   72 00000024         
+   73 00000024         ;触发 PendSV 异常 (产生上下文切换)
+   74 00000024 481D            LDR              r0, =NVIC_INT_CTRL
+   75 00000026 F04F 5180       LDR              r1, =NVIC_PENDSVSET
+   76 0000002A 6001            STR              r1, [r0]
+   77 0000002C         
+   78 0000002C         ;开中断
+   79 0000002C B661            CPSIE            F
+   80 0000002E B662            CPSIE            I
+   81 00000030         
+   82 00000030         ;永远不会到达这里
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+   83 00000030                 ENDP
+   84 00000030         
+   85 00000030         
+   86 00000030         ;/*
+   87 00000030         ; *-----------------------------------------------------
+                       ------------------
+   88 00000030         ; * void rt_hw_context_switch(rt_uint32 from, rt_uint32 
+                       to);
+   89 00000030         ; * r0 --> from
+   90 00000030         ; * r1 --> to
+   91 00000030         ; *-----------------------------------------------------
+                       ------------------
+   92 00000030         ; */
+   93 00000030         rt_hw_context_switch
+                               PROC
+   94 00000030                 EXPORT           rt_hw_context_switch
+   95 00000030         
+   96 00000030         ;设置中断标志位rt_thread_switch_interrupt_flag的
+                       值为1
+   97 00000030         ;加载 rt_thread_switch_interrupt_flag 的地址到r2
+   98 00000030 4A18            LDR              r2, =rt_thread_switch_interrupt
+_flag
+   99 00000032         ;加载 rt_thread_switch_interrupt_flag 的值到r3
+  100 00000032 6813            LDR              r3, [r2]
+  101 00000034         ;r3与1比较,相等则执行BEQ指令,否则不执行
+  102 00000034 2B01            CMP              r3, #1
+  103 00000036 D004            BEQ              _reswitch
+  104 00000038         ;设置r3的值为1
+  105 00000038 F04F 0301       MOV              r3, #1
+  106 0000003C         ;将r3存储到 rt_thread_switch_interrupt_flag
+  107 0000003C 6013            STR              r3, [r2]
+  108 0000003E         ;设置 rt_interrupt_from_thread 的值
+  109 0000003E         ;加载 rt_interrupt_from_thread 的地址到r2
+  110 0000003E 4A14            LDR              r2, =rt_interrupt_from_thread
+  111 00000040         ;存储r0的值到rt_interrupt_from_thread,即上一个�
+                       ��程栈指针sp的指针
+  112 00000040 6010            STR              r0, [r2]
+  113 00000042         
+  114 00000042         _reswitch
+  115 00000042         ;设置 rt_interrupt_to_thread 的值
+  116 00000042         ;加载 rt_interrupt_to_thread 的地址到r2
+  117 00000042 4A12            LDR              r2, =rt_interrupt_to_thread
+  118 00000044         ;存储r0的值到rt_interrupt_to_thread,即上一个线
+                       程栈指针sp的指针
+  119 00000044 6011            STR              r1, [r2]
+  120 00000046         
+  121 00000046         ;触发 PendSV 异常,实现上下文切换
+  122 00000046 4815            LDR              r0, =NVIC_INT_CTRL
+  123 00000048 F04F 5180       LDR              r1, =NVIC_PENDSVSET
+  124 0000004C 6001            STR              r1, [r0]
+  125 0000004E         
+  126 0000004E         ;子程序返回
+  127 0000004E 4770            BX               LR
+  128 00000050         ;子程序结束
+  129 00000050                 ENDP
+  130 00000050         
+  131 00000050         
+  132 00000050         ;/*
+  133 00000050         ; *-----------------------------------------------------
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+                       ------------------
+  134 00000050         ; * void PendSV_Handler(void);
+  135 00000050         ; * r0 --> switch from thread stack
+  136 00000050         ; * r1 --> switch to thread stack
+  137 00000050         ; * psr, pc, lr, r12, r3, r2, r1, r0 are pushed into [fr
+                       om] stack
+  138 00000050         ; *-----------------------------------------------------
+                       ------------------
+  139 00000050         ; */
+  140 00000050         
+  141 00000050         PendSV_Handler
+                               PROC
+  142 00000050                 EXPORT           PendSV_Handler
+  143 00000050         
+  144 00000050         ;失能中断,为了保护上下文切换不被中断
+  145 00000050 F3EF 8210       MRS              r2, PRIMASK
+  146 00000054 B672            CPSID            I
+  147 00000056         
+  148 00000056         ;获取***中断标志位***,看看是否为零
+  149 00000056         ;加载 rt_thread_switch_interrupt_flag 的地址到r0
+  150 00000056 480F            LDR              r0, =rt_thread_switch_interrupt
+_flag
+  151 00000058         ;加载 rt_thread_switch_interrupt_flag 的值到r1
+  152 00000058 6801            LDR              r1, [r0]
+  153 0000005A         ;判断 r1 是否为0,为零则跳转到 pendsv_exit
+  154 0000005A B191            CBZ              r1, pendsv_exit
+  155 0000005C         
+  156 0000005C         
+  157 0000005C         ;r1 不为0,则清零
+  158 0000005C F04F 0100       MOV              r1, #0x00
+  159 00000060         ;将r1存储到 rt_thread_switch_interrupt_flag,即清�
+                       �
+  160 00000060 6001            STR              r1, [r0]
+  161 00000062         
+  162 00000062         ;判断 rt_interrupt_from_thread 的值是否为零
+  163 00000062         ;加载 rt_interrupt_from_thread 的地址到r0
+  164 00000062 480B            LDR              r0, =rt_interrupt_from_thread
+  165 00000064         ;加载 rt_interrupt_from_thread 的值到r1
+  166 00000064 6801            LDR              r1, [r0]
+  167 00000066         ;判断r1是否为0，为0则跳转到switch_to_thread
+  168 00000066         ;第一次线程切换时rt_interrupt_from_thread肯定�
+                       ��0，则跳转到switch_to_thread
+  169 00000066 B129            CBZ              r1, switch_to_thread
+  170 00000068         
+  171 00000068         ;===================================上文保存========
+                       =========================
+  172 00000068         
+  173 00000068         ; 当进入PendSVC Handler时，上一个线程运行的
+                       环境即：
+  174 00000068         ; xPSR，PC（线程入口地址），R14，R12，R3，R
+                       2，R1，R0（线程的形参）
+  175 00000068         ; 这些CPU寄存器的值会自动保存到线程的栈
+                       中，剩下的r4~r11需要手动保存
+  176 00000068 F3EF 8109       MRS              r1, psp     ;获取线程栈指
+                                                            针到r1 , psp: 目
+                                                            前程序运行的�
+                                                            ��栈首地址
+  177 0000006C E921 0FF0       STMFD            r1!, {r4 - r11} ;将CPU寄存�
+                                                            �r4~r11的值存储
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+                                                            到r1指向的地�
+                                                            �(每操作一次�
+                                                            �址将递减一次
+                                                            )
+  178 00000070 6800            LDR              r0, [r0]    ;加载r0指向值�
+                                                            ��r0，即r0=rt_int
+                                                            errupt_from_thread
+  179 00000072 6001            STR              r1, [r0]    ;将r1的值存储�
+                                                            ��r0，即更新线
+                                                            程栈sp
+  180 00000074         
+  181 00000074         ;===================================下文切换========
+                       =========================
+  182 00000074         switch_to_thread                     ;goto
+  183 00000074         ;加载 rt_interrupt_to_thread 的地址到r1
+  184 00000074         ;rt_interrupt_to_thread 是一个全局变量,里面存�
+                       ��是线程栈指针sp的指针
+  185 00000074 4905            LDR              r1, =rt_interrupt_to_thread
+  186 00000076         ;加载 rt_interrupt_to_thread 的值到r1,SP的指针
+  187 00000076 6809            LDR              r1, [r1]
+  188 00000078         ;加载 SP 到r1
+  189 00000078 6809            LDR              r1, [r1]
+  190 0000007A         ;将线程栈指针r1(操作之前先递减)指向的内
+                       容加载到CPU寄存器r4~r11
+  191 0000007A E8B1 0FF0       LDMFD            r1!, {r4 - r11}
+  192 0000007E         ;将线程栈指针更新到psp
+  193 0000007E F381 8809       MSR              PSP, r1
+  194 00000082         
+  195 00000082         pendsv_exit                          ;goto
+  196 00000082         ;恢复中断
+  197 00000082 F382 8810       MSR              PRIMASK, r2
+  198 00000086         ;确保异常返回使用的堆栈指针是PSP，即LR�
+                       �存器的位2要为1
+  199 00000086 F04E 0E04       ORR              lr, lr, #0x04
+  200 0000008A         ;异常返回，这个时候任务堆栈中的剩下内�
+                       ��将会自动加载到xPSR，PC（任务入口地址）
+                       ，R14，R12，R3，R2，R1，R0（任务的形参）
+  201 0000008A         ;同时PSP的值也将更新，即指向任务堆栈的�
+                       ��顶。在ARMC3中，堆是由高地址向低地址生�
+                       ��的。
+  202 0000008A         
+  203 0000008A 4770            BX               lr
+  204 0000008C         
+  205 0000008C         ; PendSV_Handler 子程序结束
+  206 0000008C                 ENDP
+  207 0000008C         
+  208 0000008C         
+  209 0000008C                 ALIGN            4
+  210 0000008C         
+  211 0000008C                 END
+              00000000 
+              00000000 
+              00000000 
+              E000ED20 
+              E000ED04 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
+ork --depend=.\objects\context_rvds.d -o.\objects\context_rvds.o -IG:\GitHub_Sp
+ace\RT-thread\Project\RTE -ID:\MDK5\ARM\PACK\ARM\CMSIS\4.2.0\CMSIS\Include -ID:
+\MDK5\ARM\PACK\ARM\CMSIS\4.2.0\Device\ARM\ARMCM3\Include --predefine="__UVISION
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+_VERSION SETA 514" --predefine="_RTE_ SETA 1" --predefine="ARMCM3 SETA 1" --lis
+t=.\listings\context_rvds.lst ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rv
+ds.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 24 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      None
+Comment: .text unused
+PendSV_Handler 00000050
+
+Symbol: PendSV_Handler
+   Definitions
+      At line 141 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 142 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: PendSV_Handler used once
+_reswitch 00000042
+
+Symbol: _reswitch
+   Definitions
+      At line 114 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 103 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: _reswitch used once
+pendsv_exit 00000082
+
+Symbol: pendsv_exit
+   Definitions
+      At line 195 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 154 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: pendsv_exit used once
+rt_hw_context_switch 00000030
+
+Symbol: rt_hw_context_switch
+   Definitions
+      At line 93 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 94 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: rt_hw_context_switch used once
+rt_hw_context_switch_to 00000000
+
+Symbol: rt_hw_context_switch_to
+   Definitions
+      At line 38 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 41 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: rt_hw_context_switch_to used once
+switch_to_thread 00000074
+
+Symbol: switch_to_thread
+   Definitions
+      At line 182 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 169 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: switch_to_thread used once
+7 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+NVIC_INT_CTRL E000ED04
+
+Symbol: NVIC_INT_CTRL
+   Definitions
+      At line 16 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 74 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 122 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+
+NVIC_PENDSVSET 10000000
+
+Symbol: NVIC_PENDSVSET
+   Definitions
+      At line 19 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 75 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 123 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+
+NVIC_PENDSV_PRI 00FF0000
+
+Symbol: NVIC_PENDSV_PRI
+   Definitions
+      At line 18 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 68 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: NVIC_PENDSV_PRI used once
+NVIC_SYSPRI2 E000ED20
+
+Symbol: NVIC_SYSPRI2
+   Definitions
+      At line 17 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 67 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+Comment: NVIC_SYSPRI2 used once
+SCB_VTOR E000ED08
+
+Symbol: SCB_VTOR
+   Definitions
+      At line 15 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      None
+Comment: SCB_VTOR unused
+5 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+rt_interrupt_from_thread 00000000
+
+Symbol: rt_interrupt_from_thread
+   Definitions
+      At line 5 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 51 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 110 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 164 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+
+rt_interrupt_to_thread 00000000
+
+Symbol: rt_interrupt_to_thread
+   Definitions
+      At line 6 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 45 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 117 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 185 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+
+rt_thread_switch_interrupt_flag 00000000
+
+Symbol: rt_thread_switch_interrupt_flag
+   Definitions
+      At line 4 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+   Uses
+      At line 59 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 98 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+      At line 150 in file ..\rtthread\3.0.3\libcpu\arm\cortex-m3\context_rvds.s
+
+3 symbols
+350 symbols in table

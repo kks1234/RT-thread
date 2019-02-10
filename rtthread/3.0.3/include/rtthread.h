@@ -31,7 +31,8 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 void rt_system_scheduler_init(void);
 /* 启动调度器函数 */	
 void rt_system_scheduler_start(void);
-						
+/* 系统调度函数 */	
+void rt_schedule(void);						
 						
 						
 #endif  /* __RT_THREAD_H__ */

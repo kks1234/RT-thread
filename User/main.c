@@ -1,4 +1,5 @@
 #include <rtthread.h>
+#include <ARMCM3.h>
 
 
 /* 线程就绪列表 */
@@ -63,6 +64,9 @@ int  main()
 	/* 将线程插入到就绪列表 */
 	rt_list_insert_before(&(rt_thread_priority_table[1]),&(rt_flag2_thread.tlist));
 	
+	/* 启动系统调度器 */
+	rt_system_scheduler_start();
+	
 }
 
 
@@ -82,6 +86,7 @@ void flag1_thread_entry(void* p_arg)
 		delay(100);
 		flag1 = 0;
 		delay(100);
+		rt_schedule();
 	}
 }
 
@@ -94,5 +99,21 @@ void flag2_thread_entry(void* p_arg)
 		delay(100);
 		flag2 = 0;
 		delay(100);
+		rt_schedule();
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

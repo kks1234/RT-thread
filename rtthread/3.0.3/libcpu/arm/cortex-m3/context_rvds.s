@@ -66,7 +66,7 @@ rt_hw_context_switch_to      PROC
 	;设置 PendSV 异常的优先级
 	LDR   r0, =NVIC_SYSPRI2
 	LDR   r1, =NVIC_PENDSV_PRI
-	LDR.W r2, =[r0,#0x00]     ;读
+	LDR.W r2, [r0,#0x00]     ;读
 	ORR   r1,r1,r2            ;改
 	STR   r1, [r0]            ;写
 	
@@ -81,8 +81,53 @@ rt_hw_context_switch_to      PROC
 	
 	;永远不会到达这里
 	ENDP
-	
 
+
+;/*
+; *-----------------------------------------------------------------------
+; * void rt_hw_context_switch(rt_uint32 from, rt_uint32 to);
+; * r0 --> from
+; * r1 --> to
+; *-----------------------------------------------------------------------
+; */
+rt_hw_context_switch   PROC
+	EXPORT rt_hw_context_switch
+	
+	;设置中断标志位rt_thread_switch_interrupt_flag的值为1
+		;加载 rt_thread_switch_interrupt_flag 的地址到r2
+	LDR   r2, =rt_thread_switch_interrupt_flag
+		;加载 rt_thread_switch_interrupt_flag 的值到r3
+	LDR   r3, [r2]
+		;r3与1比较,相等则执行BEQ指令,否则不执行
+	CMP   r3, #1
+	BEQ   _reswitch
+		;设置r3的值为1
+	MOV   r3, #1
+		;将r3存储到 rt_thread_switch_interrupt_flag
+	STR   r3, [r2]
+	;设置 rt_interrupt_from_thread 的值
+		;加载 rt_interrupt_from_thread 的地址到r2
+	LDR   r2, =rt_interrupt_from_thread
+		;存储r0的值到rt_interrupt_from_thread,即上一个线程栈指针sp的指针
+	STR   r0, [r2]
+
+_reswitch
+	;设置 rt_interrupt_to_thread 的值
+		;加载 rt_interrupt_to_thread 的地址到r2
+	LDR   r2, =rt_interrupt_to_thread
+		;存储r0的值到rt_interrupt_to_thread,即上一个线程栈指针sp的指针
+	STR   r1, [r2]
+	
+	;触发 PendSV 异常,实现上下文切换
+	LDR   r0, =NVIC_INT_CTRL
+	LDR   r1, =NVIC_PENDSVSET
+	STR   r1, [r0]
+	
+	;子程序返回
+	BX   LR
+	;子程序结束
+	ENDP
+	
 
 ;/*
 ; *-----------------------------------------------------------------------
@@ -163,32 +208,4 @@ pendsv_exit ;goto
 		
 	ALIGN 4
 
-END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	END
