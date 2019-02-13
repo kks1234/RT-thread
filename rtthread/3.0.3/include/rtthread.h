@@ -8,6 +8,22 @@
 
 
 
+
+
+/*
+-------------------------------------------------------------------------
+*                               内核对象接口
+-------------------------------------------------------------------------
+*/
+void rt_object_init(struct rt_object         *object,
+                    enum rt_object_class_type type,
+                    const char               *name);
+
+
+
+
+
+
 /*
 -------------------------------------------------------------------------
 *                               线程接口
@@ -16,6 +32,7 @@
 
 /* 线程创建函数 */
 rt_err_t rt_thread_init(struct rt_thread *thread,
+						const char          *name,
 						void (*entry) (void *parameter),
 						void                *parameter,
 						void                *stack_start,
@@ -34,7 +51,27 @@ void rt_system_scheduler_start(void);
 /* 系统调度函数 */	
 void rt_schedule(void);						
 						
-						
+
+
+/*
+-------------------------------------------------------------------------
+*                             内核服务相关函数接口
+-------------------------------------------------------------------------
+*/                        
+                        
+char *rt_strncpy(char *dst, const char *src, rt_ubase_t n); 
+
+
+
+
+
+
+
+
+
+
+
+
 #endif  /* __RT_THREAD_H__ */
 
 

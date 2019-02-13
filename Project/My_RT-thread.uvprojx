@@ -448,6 +448,16 @@
               <FileType>1</FileType>
               <FilePath>..\rtthread\3.0.3\src\scheduler.c</FilePath>
             </File>
+            <File>
+              <FileName>object.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\rtthread\3.0.3\src\object.c</FilePath>
+            </File>
+            <File>
+              <FileName>kservice.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\rtthread\3.0.3\src\kservice.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
