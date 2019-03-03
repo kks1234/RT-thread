@@ -20,7 +20,13 @@ void rt_object_init(struct rt_object         *object,
                     const char               *name);
 
 
+/*
+-------------------------------------------------------------------------
+*                             空闲线程接口
+-------------------------------------------------------------------------
+*/
 
+void rt_thread_idle_init(void);
 
 
 
@@ -37,6 +43,11 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 						void                *parameter,
 						void                *stack_start,
 						rt_uint32_t          stack_size);
+						
+						
+void rt_thread_delay(rt_tick_t tick);
+						
+						
 
 /*
 -------------------------------------------------------------------------

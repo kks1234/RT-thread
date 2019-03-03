@@ -6,6 +6,7 @@
 ".\objects\scheduler.o"
 ".\objects\object.o"
 ".\objects\kservice.o"
+".\objects\idle.o"
 ".\objects\startup_armcm3.o"
 ".\objects\system_armcm3.o"
 --strict --scatter ".\Objects\My_RT-thread.sct"

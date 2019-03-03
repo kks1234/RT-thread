@@ -458,6 +458,11 @@
               <FileType>1</FileType>
               <FilePath>..\rtthread\3.0.3\src\kservice.c</FilePath>
             </File>
+            <File>
+              <FileName>idle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\rtthread\3.0.3\src\idle.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

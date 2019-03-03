@@ -4,6 +4,9 @@
 
 
 
+/* 空闲线程控制块 */
+extern struct rt_thread idle;
+
 /* 当前线程控制块指针 */
 struct rt_thread *rt_current_thread;
 
@@ -55,7 +58,9 @@ void rt_schedule(void)
 {
 	struct rt_thread *to_thread ;
 	struct rt_thread *from_thread ;
-	
+
+/*---------------------------------------------------*/
+#if 0	
 	/* 两个线程轮流切换 */
 	if(rt_current_thread == rt_list_entry( rt_thread_priority_table[0].next,
 										   struct rt_thread,
@@ -75,6 +80,25 @@ void rt_schedule(void)
 								   tlist );
 		rt_current_thread = to_thread;
 	}
+	
+#else
+/*-------------------------------------------------------*/
+	
+	
+	/* 如果当前线程是空闲线程，那么就去尝试执行线程1 或 线程2 ，
+		看他们延时时间是否结束，如果线程延时时间均没有到期，
+		那就返回继续执行空闲线程. */
+	if( rt_current_thread == &idle)
+	{
+		
+		
+		
+		
+	}
+	
+	
+	
+#endif
 	/* 产生上下文切换 */
 	rt_hw_context_switch((rt_uint32_t)&from_thread->sp,(rt_uint32_t)&to_thread->sp);
 }

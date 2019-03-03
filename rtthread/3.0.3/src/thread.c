@@ -2,6 +2,11 @@
 #include <rthw.h>
 
 
+/* 当前线程控制块指针 */
+extern struct rt_thread *rt_current_thread;
+
+
+
 /* 线程创建函数 */
 rt_err_t rt_thread_init(struct rt_thread *thread,
 						const char          *name,
@@ -35,7 +40,20 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 
 
 
-
+/* 阻塞延时函数 */
+void rt_thread_delay(rt_tick_t tick)
+{
+	struct rt_thread *thread;
+	
+	/* 获取当前线程的线程控制块 */
+	thread = rt_current_thread;
+	
+	/* 设置延时时间 */
+	thread->remaining_tick = tick;
+	
+	/* 进行系统调度 */
+	rt_schedule();
+}
 
 
 
