@@ -4,8 +4,7 @@
 
 
 
-/* 线程就绪列表 */
-extern rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
+
 
 
 #define IDLE_THREAD_STACK_SIZE       512
@@ -19,6 +18,9 @@ static rt_uint8_t rt_thread_stack[IDLE_THREAD_STACK_SIZE];
 
 /* 空闲线程的线程控制块 */
 struct rt_thread idle;
+
+/* 线程就绪列表 */
+extern rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
 
 /* 在RT-Thread中空闲线程函数主要做一些系统内存清理工作，本章只实现对一个全局变量进行计数 */
 

@@ -9,7 +9,7 @@
 #define RT_NAME_MAX                          8     /* 对象名字的最大长度 */
 
 
-
+#define RT_TICK_PER_SECOND                   100   /* SysTick 定时器的周期设置 */
 
 
 
