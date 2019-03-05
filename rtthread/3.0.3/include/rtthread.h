@@ -44,10 +44,14 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 						void                *stack_start,
 						rt_uint32_t          stack_size);
 						
-						
+/* 阻塞延时函数 */						
 void rt_thread_delay(rt_tick_t tick);
-	
 
+/*调度器插入线程*/						                        
+void rt_schedule_insert_thread(struct rt_thread *thread);
+
+/* 调度器删除线程 */						
+void rt_schedule_remove_thread(struct rt_thread *thread);
 						
 /*
 -------------------------------------------------------------------------

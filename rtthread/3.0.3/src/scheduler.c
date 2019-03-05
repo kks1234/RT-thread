@@ -20,11 +20,28 @@ extern struct rt_thread rt_flag2_thread;
 
 
 
-/* 线程就绪列表 */
+/* 线程就绪优先级组 */
+rt_uint32_t rt_thread_ready_priority_group;
+
+/* 线程就绪列表 */ /* 线程优先级表 */
 rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
+
+
 
 							/* 线程休眠列表 */
 							rt_list_t rt_thread_defunct;
+
+
+
+
+
+
+/*
+*************************************************************************
+*                               函数实现
+*************************************************************************
+*/
+
 
 void rt_system_scheduler_init(void)
 {
@@ -62,6 +79,67 @@ void rt_system_scheduler_start(void)
 	   则执行的时候会将形参传入到CPU寄存器r0 */
 	rt_hw_context_switch_to((rt_uint32_t)&to_rhtead->sp);						  
 }
+
+
+
+
+
+
+
+
+
+/*调度器插入线程*/
+void rt_schedule_insert_thread(struct rt_thread *thread)
+{
+	register rt_base_t temp;
+	
+	/* 关中断 */
+	temp = rt_hw_interrupt_disable();
+	
+	/* 改变线程状态 */
+	thread->stat = RT_THREAD_READY;
+	
+	/* 将线程插入就绪列表 */
+	rt_list_insert_before(&(rt_thread_priority_table[thread->current_priority]),
+							&(thread->tlist));
+	/* 设置线程就绪优先级组中的对应的位 */
+	rt_thread_ready_priority_group |= thread->number_mask;
+	
+	/* 开中断 */
+	rt_hw_interrupt_enable(temp);
+	
+}
+
+
+
+/* 调度器删除线程 */						
+void rt_schedule_remove_thread(struct rt_thread *thread)
+{
+	register rt_base_t temp;
+	
+	/* 关中断 */	
+	temp = rt_hw_interrupt_disable();
+	
+	/* 将线程从就绪列表删除 */
+	rt_list_remove(&(thread->tlist));
+	
+	/* 将线程就绪优先组队员的位清除 */
+	if(rt_list_isempty(&(rt_thread_priority_table[thread->current_priority])))
+	{
+		rt_thread_ready_priority_group &= ~(thread->number_mask);
+	}
+	
+	/* 开中断 */
+	rt_hw_interrupt_enable(temp);
+
+}
+
+
+
+
+
+
+
 
 
 
