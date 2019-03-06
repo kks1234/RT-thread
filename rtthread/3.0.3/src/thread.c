@@ -4,8 +4,8 @@
 
 /* 当前线程控制块指针 */
 extern struct rt_thread *rt_current_thread;
-
-
+/* 线程优先级组 */
+extern rt_uint32_t rt_thread_ready_priority_group;
 
 /* 线程创建函数 */
 rt_err_t rt_thread_init(struct rt_thread *thread,
@@ -53,6 +53,7 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 /* 阻塞延时函数 */
 void rt_thread_delay(rt_tick_t tick)
 {
+#if 0
 	struct rt_thread *thread;
 	
 	/* 获取当前线程的线程控制块 */
@@ -63,6 +64,28 @@ void rt_thread_delay(rt_tick_t tick)
 	
 	/* 进行系统调度 */
 	rt_schedule();
+#else
+	
+	register rt_base_t temp;
+	struct rt_thread *thread;
+	
+	/* 关闭中断 */
+	temp = rt_hw_interrupt_disable();
+	
+	thread = rt_current_thread;
+	thread->remaining_tick = tick;
+	
+	/* 改变线程状态 */
+	thread->stat = RT_THREAD_SUSPEND;
+	rt_thread_ready_priority_group &= ~thread->number_mask;
+	
+	/* 使能中断 */
+	rt_hw_interrupt_enable(temp);
+	
+	/* 进行系统调度 */
+	rt_schedule();
+	
+#endif
 }
 
 
@@ -120,6 +143,9 @@ rt_thread_t rt_thread_self(void)
 {
 	return rt_current_thread;
 }
+
+
+
 
 
 

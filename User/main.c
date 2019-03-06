@@ -67,10 +67,13 @@ int  main()
 					flag1_thread_entry,
 					RT_NULL,
 					&rt_flag1_thread_stack[0],
-					sizeof(rt_flag1_thread_stack));
+					sizeof(rt_flag1_thread_stack),
+					2);
 	/* 将线程插入到就绪列表 */
-	rt_list_insert_before(&(rt_thread_priority_table[0]),&(rt_flag1_thread.tlist));
-	
+//	rt_list_insert_before(&(rt_thread_priority_table[0]),&(rt_flag1_thread.tlist));
+	rt_thread_startup(&rt_flag1_thread);
+					
+					
 	
 	/* 初始化线程 */
 	rt_thread_init( &rt_flag2_thread,
@@ -78,10 +81,13 @@ int  main()
 					flag2_thread_entry,
 					RT_NULL,
 					&rt_flag2_thread_stack[0],
-					sizeof(rt_flag2_thread_stack));	
+					sizeof(rt_flag2_thread_stack),
+					3);	
 	/* 将线程插入到就绪列表 */
-	rt_list_insert_before(&(rt_thread_priority_table[1]),&(rt_flag2_thread.tlist));
-	
+//	rt_list_insert_before(&(rt_thread_priority_table[1]),&(rt_flag2_thread.tlist));
+	rt_thread_startup(&rt_flag2_thread);
+					
+					
 	/* 启动系统调度器 */
 	rt_system_scheduler_start();
 	
