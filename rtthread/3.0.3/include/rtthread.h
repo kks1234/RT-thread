@@ -42,7 +42,8 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 						void (*entry) (void *parameter),
 						void                *parameter,
 						void                *stack_start,
-						rt_uint32_t          stack_size);
+						rt_uint32_t          stack_size,
+						rt_uint8_t           priority);
 						
 /* 阻塞延时函数 */						
 void rt_thread_delay(rt_tick_t tick);
@@ -52,6 +53,17 @@ void rt_schedule_insert_thread(struct rt_thread *thread);
 
 /* 调度器删除线程 */						
 void rt_schedule_remove_thread(struct rt_thread *thread);
+						
+/* 线程启动函数 */
+rt_err_t rt_thread_startup(rt_thread_t thread);
+						
+/* 恢复线程函数 */
+rt_err_t rt_thread_resume(rt_thread_t thread);
+
+/* 返回当前线程的指针 */						
+rt_thread_t rt_thread_self(void); 
+	
+/**/
 						
 /*
 -------------------------------------------------------------------------
@@ -88,7 +100,8 @@ void rt_schedule(void);
                         
 char *rt_strncpy(char *dst, const char *src, rt_ubase_t n); 
 
-
+/* 优先级查找函数 */
+int __rt_ffs(int value);
 
 
 

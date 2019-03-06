@@ -10,7 +10,8 @@ extern struct rt_thread idle;
 /* 当前线程控制块指针 */
 struct rt_thread *rt_current_thread;
 
-
+/* 当前线程的优先级 */
+rt_uint8_t rt_current_priority;
 
 /* 线程 */
 
@@ -29,7 +30,7 @@ rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
 
 
 							/* 线程休眠列表 */
-							rt_list_t rt_thread_defunct;
+//							rt_list_t rt_thread_defunct;
 
 
 
@@ -45,6 +46,7 @@ rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
 
 void rt_system_scheduler_init(void)
 {
+#if 0
 	register rt_base_t offset;
 	
 	for(offset = 0 ; offset < RT_THREAD_PRIORITY_MAX ; offset ++)
@@ -56,13 +58,34 @@ void rt_system_scheduler_init(void)
 	rt_current_thread = RT_NULL ;
 	
 						    /* 初始化线程休眠列表，当线程创建好没有启动之前会被放入到这个列表 */
-							rt_list_init(&rt_thread_defunct);
+//							rt_list_init(&rt_thread_defunct);
+#else
+	
+	register rt_base_t offset;
+	
+	/* 线程优先级表初始化 */
+	for(offset=0; offset<RT_THREAD_PRIORITY_MAX; offset++)
+	{
+		rt_list_init(&rt_thread_priority_table[offset]);
+	}
+	
+	/* 初始化当前线程的优先级为空闲线程的优先级 */
+	rt_current_priority = RT_THREAD_PRIORITY_MAX -1 ;
+	
+	/* 初始化当前线程控制块指针 */
+	rt_current_thread = RT_NULL;
+	
+	/* 初始化线程就绪优先级组 */
+	rt_thread_ready_priority_group = 0;
+
+#endif
 }
 
 
 /* 启动调度器函数 */	
 void rt_system_scheduler_start(void)
 {
+#if 0
 	register struct rt_thread *to_rhtead;
 	
 	
@@ -77,7 +100,27 @@ void rt_system_scheduler_start(void)
 	   在rthw.h声明,用于实现第一次线程切换。
 	   当一个汇编函数在C文件中调用的时候,如果有形参,
 	   则执行的时候会将形参传入到CPU寄存器r0 */
-	rt_hw_context_switch_to((rt_uint32_t)&to_rhtead->sp);						  
+	rt_hw_context_switch_to((rt_uint32_t)&to_rhtead->sp);
+#else
+	
+	register struct rt_thread *to_thread;
+	register rt_ubase_t highest_ready_priority;
+							  
+	/* 获取就绪的最高优先级 */
+	highest_ready_priority = __rt_ffs(rt_thread_ready_priority_group) - 1;
+			
+	/* 获取将要运行的线程块 */
+	to_thread = rt_list_entry(rt_thread_priority_table[highest_ready_priority].next,
+								struct rt_thread,
+								tlist);
+	
+	rt_current_thread = to_thread;
+
+	/*  切换到新的线程 */
+	rt_hw_context_switch_to((rt_uint32_t)&to_thread->sp);
+								
+	/* 永远不会返回 */
+#endif							  
 }
 
 

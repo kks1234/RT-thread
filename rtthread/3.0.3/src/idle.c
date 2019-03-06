@@ -50,11 +50,14 @@ void rt_thread_idle_init(void)
 					rt_thread_idle_entry,
 					RT_NULL,
 					&rt_thread_stack[0],
-					sizeof(rt_thread_stack));
+					sizeof(rt_thread_stack),
+					RT_THREAD_PRIORITY_MAX - 1);
 	
 	/* 将线程插入就绪列表 */  /* 空闲线程默认最低优先级 */
-	rt_list_insert_before( &(rt_thread_priority_table[RT_THREAD_PRIORITY_MAX-1]),
-							&(idle.list));
+//	rt_list_insert_before( &(rt_thread_priority_table[RT_THREAD_PRIORITY_MAX-1]),
+//							&(idle.list));
+	
+	rt_thread_startup(&idle);
 	
 }
 
