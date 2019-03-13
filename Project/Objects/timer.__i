@@ -1,0 +1,6 @@
+-c --cpu Cortex-M3 --li -g -O0 --apcs=interwork --split_sections -I..\User -I..\rtthread\3.0.3\bsp -I..\rtthread\3.0.3\components\finsh -I..\rtthread\3.0.3\include -I..\rtthread\3.0.3\include\libc
+-I G:\GitHub_Space\RT-thread\Project\RTE
+-I D:\MDK5\ARM\PACK\ARM\CMSIS\4.2.0\CMSIS\Include
+-I D:\MDK5\ARM\PACK\ARM\CMSIS\4.2.0\Device\ARM\ARMCM3\Include
+-D__UVISION_VERSION="514" -D_RTE_ -DARMCM3
+-o .\objects\timer.o --omf_browse .\objects\timer.crf --depend .\objects\timer.d "..\rtthread\3.0.3\src\timer.c"

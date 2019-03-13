@@ -473,6 +473,11 @@
               <FileType>1</FileType>
               <FilePath>..\rtthread\3.0.3\src\irq.c</FilePath>
             </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\rtthread\3.0.3\src\timer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

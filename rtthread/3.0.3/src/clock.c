@@ -57,7 +57,11 @@ void rt_tick_increase(void)
 
 
 
-
+/* 获取时间变量的值 */
+rt_tick_t rt_tick_get(void)
+{
+	return rt_tick;
+}
 
 
 

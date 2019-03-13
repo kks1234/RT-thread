@@ -44,11 +44,22 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 	thread->error = RT_EOK;
 	thread->stat = RT_THREAD_INIT;
 	
+	/* 初始化定时器 */
+	rt_timer_init(&(thread->thread_timer),      /* 静态定时器对象 */
+					thread->name,               /* 定时器的名字，直接用的是线程的名字 */
+					rt_thread_timeout,          /* 超时函数 */
+					thread,                     /* 超时函数形参 */
+					0,                          /* 延时时间 */
+					RT_TIMER_FLAG_ONE_SHOT);    /* 定时器的标志 */
+	
 	return RT_EOK;
 }
 
 
 
+
+
+#if 0
 
 /* 阻塞延时函数 */
 void rt_thread_delay(rt_tick_t tick)
@@ -87,6 +98,55 @@ void rt_thread_delay(rt_tick_t tick)
 	
 #endif
 }
+
+#else
+
+/* 阻塞延时函数 */
+rt_err_t rt_thread_delay(rt_tick_t tick)
+{
+	return rt_thread_sleep(tick);
+}
+
+#endif
+
+
+
+/* 线程休眠函数 
+	该函数使线程睡眠一段时间*/
+rt_err_t rt_thread_sleep(rt_tick_t tick)
+{
+	register rt_base_t temp;
+	struct rt_thread *thread;
+	
+	/* 关中断 */
+	temp = rt_hw_interrupt_disable();
+	
+	/* 获取当前线程控制块 */
+	thread = rt_current_thread;
+	
+	/* 挂起线程 */
+	rt_thread_suspend(thread);
+	
+	/* 设置线程定时器的超时时间 */
+	rt_timer_control(&(thread->thread_timer), RT_TIMER_CTRL_SET_TIME, &tick);
+	
+	/* 启动定时器 */
+	rt_timer_start(&(thread->thread_timer));
+	
+	/* 开中断 */
+	rt_hw_interrupt_enable(temp);
+	
+	/* 执行调度 */
+	rt_schedule();
+	
+	return RT_EOK;
+}
+
+
+
+
+
+
 
 
 /* 线程启动函数 */
@@ -147,6 +207,31 @@ rt_thread_t rt_thread_self(void)
 
 
 
+
+/**
+ * 线程超时函数
+ * 当线程延时到期或者等待的资源可用或者超时时，该函数会被调用
+ * 
+ * @param parameter 超时函数的形参
+ */
+void rt_thread_timeout(void *parameter)
+{
+	struct rt_thread *thread;
+	
+	thread = (struct rt_thread*)parameter;
+	
+	/* 设置错误码为超时 */
+	thread->error = -RT_ETIMEOUT;
+	
+	/* 将线程从挂起列表中删除 */
+	rt_list_remove(&(thread->tlist));
+	
+	/* 将线程插入到就序列表 */
+	rt_schedule_insert_thread(thread);
+	
+	/* 系统调度 */
+	rt_schedule();
+}
 
 
 

@@ -12,12 +12,45 @@
 
 /*
 -------------------------------------------------------------------------
+*                              定时器接口
+-------------------------------------------------------------------------
+*/
+
+/* 定时器表初始化 */
+void rt_system_timer_init(void);
+
+/* 定时器初始化函数 */
+void rt_timer_init(rt_timer_t timer,
+					const char *name,
+					void (*timeout) (void *parameter),
+					void    *parameter,
+					rt_tick_t   time,
+					rt_uint8_t  flag);
+
+/* 定时器停止函数 */
+rt_err_t rt_timer_stop(rt_timer_t timer);
+
+/* 定时器控制函数 */
+rt_err_t rt_timer_control(rt_timer_t timer, int cmd, void *arg);
+					
+/* 定时器启动函数 */
+rt_err_t rt_timer_start(rt_timer_t timer);
+
+/* 定时器扫描函数 */					
+void rt_timer_check(void);					
+					
+					
+/*
+-------------------------------------------------------------------------
 *                               内核对象接口
 -------------------------------------------------------------------------
 */
 void rt_object_init(struct rt_object         *object,
                     enum rt_object_class_type type,
                     const char               *name);
+
+					
+					
 
 
 /*
@@ -44,9 +77,12 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 						void                *stack_start,
 						rt_uint32_t          stack_size,
 						rt_uint8_t           priority);
+
+/* 线程休眠函数 */
+rt_err_t rt_thread_sleep(rt_tick_t tick);
 						
 /* 阻塞延时函数 */						
-void rt_thread_delay(rt_tick_t tick);
+rt_err_t rt_thread_delay(rt_tick_t tick);
 
 /*调度器插入线程*/						                        
 void rt_schedule_insert_thread(struct rt_thread *thread);
@@ -63,17 +99,22 @@ rt_err_t rt_thread_resume(rt_thread_t thread);
 /* 返回当前线程的指针 */						
 rt_thread_t rt_thread_self(void); 
 	
-/**/
-						
+/* 超时函数接口 */
+void rt_thread_timeout(void *parameter); 
+
+
+
 /*
 -------------------------------------------------------------------------
 *                             时钟相关接口
 -------------------------------------------------------------------------
 */ 						
 
-						
+/* 时基更新函数 */						
 void rt_tick_increase(void);
-						
+
+/* 获取时间变量的值 */
+rt_tick_t rt_tick_get(void);						
 						
 						
 						
