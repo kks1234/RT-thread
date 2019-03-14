@@ -10,7 +10,7 @@ extern rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
 extern rt_uint32_t rt_thread_ready_priority_group;
 
 
-
+#if 0
 /* 时基更新函数 */
 void rt_tick_increase(void)
 {
@@ -52,7 +52,18 @@ void rt_tick_increase(void)
 	rt_schedule();
 }
 
+#else
 
+void rt_tick_increase(void)
+{
+	/* 系统时基计数器加 1 操作，rt_tick 是一个全局变量 */
+	++ rt_tick;
+	
+	/* 扫描定时器列表 */
+	rt_timer_check();
+}
+
+#endif
 
 
 

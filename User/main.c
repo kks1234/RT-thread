@@ -9,12 +9,13 @@ extern rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
 /* 定义全局变量 */
 rt_uint8_t flag1;
 rt_uint8_t flag2;
-
+rt_uint8_t flag3;
 
 
 /* 定义线程控制块 */
 struct rt_thread rt_flag1_thread;
 struct rt_thread rt_flag2_thread;
+struct rt_thread rt_flag3_thread;
 
 
 ALIGN(RT_ALIGN_SIZE)
@@ -24,7 +25,7 @@ ALIGN(RT_ALIGN_SIZE)
 /* 定义线程栈 */
 rt_uint8_t rt_flag1_thread_stack[512];
 rt_uint8_t rt_flag2_thread_stack[512];
-
+rt_uint8_t rt_flag3_thread_stack[512];
 
 
 
@@ -32,6 +33,7 @@ rt_uint8_t rt_flag2_thread_stack[512];
 /* 线程函数声明 */
 void flag1_thread_entry(void* p_arg);
 void flag2_thread_entry(void* p_arg);
+void flag3_thread_entry(void* p_arg);
 /* 软件延时函数声明 */
 void delay(rt_uint32_t count);
 
@@ -54,6 +56,9 @@ int  main()
 	
 	/* SysTick 中断频率设置 */
 	SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
+	
+	/* 系统定时器列表初始化 */
+	rt_system_timer_init();
 	
 	/* 调度器初始化 */
 	rt_system_scheduler_init();
@@ -87,6 +92,20 @@ int  main()
 //	rt_list_insert_before(&(rt_thread_priority_table[1]),&(rt_flag2_thread.tlist));
 	rt_thread_startup(&rt_flag2_thread);
 					
+	
+	/* 初始化线程 */
+	rt_thread_init(&rt_flag3_thread,
+					"rt_flag3_thread",
+					flag3_thread_entry,
+					RT_NULL,
+					&rt_flag3_thread_stack[0],
+					sizeof(rt_flag3_thread_stack),
+					4);
+	/* 将线程插入到就绪列表 */				
+	rt_thread_startup(&rt_flag3_thread);
+	
+
+
 					
 	/* 启动系统调度器 */
 	rt_system_scheduler_start();
@@ -114,9 +133,9 @@ void flag1_thread_entry(void* p_arg)
 		rt_schedule();
 #else 
 		flag1 = 1;
-		rt_thread_delay(2);
+		rt_thread_delay(4);
 		flag1 = 0;
-		rt_thread_delay(2);
+		rt_thread_delay(4);
 #endif
 	}
 }
@@ -144,7 +163,17 @@ void flag2_thread_entry(void* p_arg)
 
 
 
-
+/* 线程3 */
+void flag3_thread_entry(void* p_arg)
+{
+	while(1)
+	{
+		flag3 = 1;
+		rt_thread_delay(3);
+		flag3  =0;
+		rt_thread_delay(3);
+	}
+}
 
 
 void SysTick_Handler(void)

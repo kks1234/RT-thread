@@ -145,6 +145,42 @@ rt_err_t rt_thread_sleep(rt_tick_t tick)
 
 
 
+/**
+ * 该函数用于挂起指定线程
+ * @param thread 要挂起的线程
+ * 
+ * @return 操作状态
+ * 
+ * @note 如果挂起的是线程自身，在调用该函数后，
+ * 必须调用 rt_schedule() 进行系统调度
+ */
+rt_err_t rt_thread_suspend(rt_thread_t thread)
+{
+	register rt_base_t temp;
+	
+	/* 只有就绪的线程才能挂起，否则推出返回错误码 */
+	if((thread->stat & RT_THREAD_STAT_MASK) != RT_THREAD_READY)
+	{
+		return -RT_ERROR;
+	}
+	
+	/* 关中断 */
+	temp = rt_hw_interrupt_disable();
+	
+	/* 改变线程状态 */
+	thread->stat = RT_THREAD_SUSPEND;
+	/* 将线程从就绪列表删除 */
+	rt_schedule_remove_thread(thread);
+	
+	/* 停止线程定时器 */
+	rt_timer_stop(&(thread->thread_timer));
+	
+	/* 开中断 */
+	rt_hw_interrupt_enable(temp);
+	
+	return RT_EOK;
+}
+
 
 
 

@@ -136,6 +136,11 @@ struct rt_object_information
 
 #endif
 
+#ifndef RT_TIMER_SKIP_LIST_MASK
+#define RT_TIMER_SKIP_LIST_MASK         0x3
+#endif
+
+
 /**
  * 定时器结构体
  */

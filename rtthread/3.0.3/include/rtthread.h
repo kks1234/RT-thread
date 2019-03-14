@@ -95,6 +95,9 @@ rt_err_t rt_thread_startup(rt_thread_t thread);
 						
 /* 恢复线程函数 */
 rt_err_t rt_thread_resume(rt_thread_t thread);
+			
+/* 线程挂起函数 */
+rt_err_t rt_thread_suspend(rt_thread_t thread);
 
 /* 返回当前线程的指针 */						
 rt_thread_t rt_thread_self(void); 

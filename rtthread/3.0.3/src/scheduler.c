@@ -322,7 +322,7 @@ void rt_schedule(void)
 	
 #endif
 	/* 产生上下文切换 */
-	rt_hw_context_switch((rt_uint32_t)&from_thread->sp,(rt_uint32_t)&to_thread->sp);
+	//rt_hw_context_switch((rt_uint32_t)&from_thread->sp,(rt_uint32_t)&to_thread->sp);
 }
 
 

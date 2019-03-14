@@ -260,13 +260,13 @@ rt_err_t rt_timer_start(rt_timer_t timer)
 	/* RT_TIMER_SKIP_LIST_LEVEL 的值为1 for循环永远不会被执行 */
 	for(row_lvl=2; row_lvl<=RT_TIMER_SKIP_LIST_LEVEL; row_lvl++)
 	{
-		if(!(tst_nr & RT_TIMER_SKIP_LIST_LEVEL))
+		if(!(tst_nr & RT_TIMER_SKIP_LIST_MASK))
 			rt_list_insert_after(row_head[RT_TIMER_SKIP_LIST_LEVEL - row_lvl],
 									&(timer->row[RT_TIMER_SKIP_LIST_LEVEL - row_lvl]));
 		else
 			break;
 		
-		tst_nr >>= (RT_TIMER_SKIP_LIST_LEVEL + 1) >> 1;
+		tst_nr >>= (RT_TIMER_SKIP_LIST_MASK + 1) >> 1;
 	}
 	
 	/* 设置定时器标志位为激活状态 */
