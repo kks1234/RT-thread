@@ -184,8 +184,8 @@ struct rt_thread
 	void    *stack_addr ;                 /* 线程栈起始地址 */
 	rt_uint32_t stack_size ;              /* 线程栈大小，单位为字节 */
 		
-	
-	rt_ubase_t   remaining_tick;          /* 用于实现阻塞延时 */
+	rt_ubase_t   init_tick;               /* 初始化时间片 */
+	rt_ubase_t   remaining_tick;          /* 剩余时间片 */
 	
 	rt_uint8_t   current_priority;        /* 当前优先级 */
 	rt_uint8_t   init_priority;           /* 初始优先级 */

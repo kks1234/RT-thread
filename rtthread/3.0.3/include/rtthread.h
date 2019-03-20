@@ -76,7 +76,8 @@ rt_err_t rt_thread_init(struct rt_thread *thread,
 						void                *parameter,
 						void                *stack_start,
 						rt_uint32_t          stack_size,
-						rt_uint8_t           priority);
+						rt_uint8_t           priority,
+						rt_uint32_t          tick);
 
 /* 线程休眠函数 */
 rt_err_t rt_thread_sleep(rt_tick_t tick);
@@ -105,7 +106,8 @@ rt_thread_t rt_thread_self(void);
 /* 超时函数接口 */
 void rt_thread_timeout(void *parameter); 
 
-
+/* 线程让出处理器函数 */
+rt_err_t rt_thread_yield(void);
 
 /*
 -------------------------------------------------------------------------
